@@ -1,0 +1,175 @@
+/* Floating Webcam Preview Styles */
+
+.webcam-preview-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 250px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 9999;
+    transition: all 0.3s ease;
+    cursor: grab;
+}
+
+.webcam-preview-container:active {
+    cursor: grabbing;
+}
+
+/* Header */
+.webcam-preview-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+}
+
+.webcam-preview-header:active {
+    cursor: grabbing;
+}
+
+.webcam-preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.webcam-preview-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 20px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+}
+
+.webcam-preview-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Video */
+.webcam-preview-video {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    background: #000;
+}
+
+/* Status Indicator */
+.webcam-status-indicator {
+    position: absolute;
+    top: 40px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    backdrop-filter: blur(4px);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Error Message */
+.webcam-error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    text-align: center;
+    max-width: 200px;
+}
+
+/* Hover Effects */
+.webcam-preview-container:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .webcam-preview-container {
+        width: 200px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .webcam-preview-video {
+        height: 150px;
+    }
+
+    .webcam-preview-title {
+        font-size: 11px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .webcam-preview-container {
+        width: 220px;
+    }
+
+    .webcam-preview-video {
+        height: 165px;
+    }
+}
+
+/* Animation on show */
+@keyframes slideIn {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.webcam-preview-container {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Dragging state */
+.webcam-preview-container.dragging {
+    transition: none;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}

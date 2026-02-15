@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Task Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='webcam-preview.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🚀 AI-Powered Task Optimizer</h1>
+            <p class="subtitle">Privacy-first, explainable AI assistant for emotion-aware task recommendations</p>
+            
+            <div class="privacy-notice">
+                <h3>🔒 Privacy & Data Use</h3>
+                <ul>
+                    <li><strong>No personal data is stored</strong> – all inputs processed in memory only</li>
+                    <li><strong>No face recognition</strong> – only emotion detection from single frame</li>
+                    <li><strong>Webcam frame captured once and discarded</strong> after analysis</li>
+                    <li><strong>All processing done locally</strong> – no external data sharing</li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="text-input">
+                <h2>📝 Text-based Emotion Input</h2>
+                <textarea 
+                    id="emotionText" 
+                    placeholder="Describe how you are feeling right now (e.g., I feel stressed because of workload and upcoming deadlines...)"
+                    rows="4"
+                ></textarea>
+            </div>
+
+            <div class="face-input">
+                <h2>📷 Optional Facial Emotion Detection</h2>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="useFace">
+                    <span class="checkmark"></span>
+                    Enable one-time webcam capture for facial emotion
+                </label>
+                <p class="note">⚠️ Make sure to allow camera permissions when prompted</p>
+                <button id="testCameraBtn" class="test-camera-btn">🧪 Test Camera</button>
+                <button id="togglePreviewBtn" class="toggle-preview-btn">👁️ Show Live Preview</button>
+                <div id="cameraTestResult" class="camera-test-result hidden"></div>
+            </div>
+
+            <button id="analyzeBtn" class="analyze-btn">🎯 Analyze & Recommend</button>
+        </section>
+
+        <!-- Loading Section -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Analyzing emotions and generating recommendations...</p>
+        </div>
+
+        <!-- Results Section -->
+        <section id="results" class="results-section hidden">
+            <h2>🧠 Emotion Analysis & Task Recommendations</h2>
+            
+            <div class="metrics">
+                <div class="metric">
+                    <h3>Final Emotion</h3>
+                    <span id="finalEmotion" class="metric-value"></span>
+                </div>
+                <div class="metric">
+                    <h3>Confidence</h3>
+                    <span id="confidence" class="metric-value"></span>
+                </div>
+                <div class="metric">
+                    <h3>Level</h3>
+                    <span id="level" class="metric-value"></span>
+                </div>
+            </div>
+
+            <div class="breakdown">
+                <h3>📊 Detailed Breakdown</h3>
+                <div id="breakdownContent"></div>
+            </div>
+
+            <div class="recommendations">
+                <h3>📋 Recommended Task Types</h3>
+                <ul id="taskList"></ul>
+            </div>
+
+            <div id="confidenceMessage" class="info-message hidden">
+                ℹ️ Low confidence detected. Recommendations are conservative.
+            </div>
+
+            <div class="success-message">
+                ✅ Analysis complete! Use these recommendations to optimize your productivity.
+            </div>
+        </section>
+
+        <!-- Error Section -->
+        <div id="error" class="error-section hidden">
+            <h3>❌ Error</h3>
+            <p id="errorMessage"></p>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🔒 Privacy-first emotion detection and task recommendations</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='webcam-preview.js') }}"></script>
+    <script>
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const testCameraBtn = document.getElementById('testCameraBtn');
+        const togglePreviewBtn = document.getElementById('togglePreviewBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+
+        // Initialize webcam preview
+        let webcamPreview = null;
+
+        // Toggle webcam preview
+        togglePreviewBtn.addEventListener('click', async () => {
+            if (!webcamPreview) {
+                webcamPreview = new WebcamPreview();
+            }
+
+            if (webcamPreview.isVisible()) {
+                webcamPreview.hide();
+                togglePreviewBtn.textContent = '👁️ Show Live Preview';
+                togglePreviewBtn.style.background = 'linear-gradient(135deg, #27ae60, #229954)';
+            } else {
+                await webcamPreview.show();
+                togglePreviewBtn.textContent = '🙈 Hide Live Preview';
+                togglePreviewBtn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (webcamPreview) {
+                webcamPreview.destroy();
+            }
+        });
+
+        // Test camera functionality
+        testCameraBtn.addEventListener('click', async () => {
+            const testResult = document.getElementById('cameraTestResult');
+            testResult.classList.remove('hidden');
+            testResult.innerHTML = '<p>🔄 Testing camera...</p>';
+            
+            try {
+                const response = await fetch('/test_camera');
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResult.innerHTML = `<p style="color: green;">✅ ${data.message}</p>`;
+                } else {
+                    testResult.innerHTML = `<p style="color: orange;">⚠️ ${data.message}</p>`;
+                }
+            } catch (err) {
+                testResult.innerHTML = `<p style="color: red;">❌ Camera test failed: ${err.message}</p>`;
+            }
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            const text = document.getElementById('emotionText').value.trim();
+            const useFace = document.getElementById('useFace').checked;
+
+            // Validation
+            if (!text && !useFace) {
+                alert('⚠️ Please provide a text description or enable facial emotion detection.');
+                return;
+            }
+
+            // Show loading
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            error.classList.add('hidden');
+            analyzeBtn.disabled = true;
+
+            // Initialize webcam preview if facial detection is enabled
+            let tempWebcamPreview = null;
+            if (useFace) {
+                try {
+                    tempWebcamPreview = new WebcamPreview();
+                    await tempWebcamPreview.show();
+                    console.log('📷 Camera preview started for analysis');
+                } catch (err) {
+                    console.error('Camera preview error:', err);
+                }
+            }
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        use_face: useFace
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display results
+                    document.getElementById('finalEmotion').textContent = data.final_emotion.toUpperCase();
+                    document.getElementById('confidence').textContent = (data.final_confidence * 100).toFixed(1) + '%';
+                    document.getElementById('level').textContent = data.recommendation_level;
+
+                    // Breakdown
+                    const breakdownContent = document.getElementById('breakdownContent');
+                    let faceAnalysisText = '';
+                    
+                    if (useFace) {
+                        if (data.face_analysis_note) {
+                            faceAnalysisText = `<p><strong>Facial emotion:</strong> ${data.face_emotion} (confidence: ${(data.face_confidence * 100).toFixed(1)}%)</p>
+                                              <p><em>Note: ${data.face_analysis_note}</em></p>`;
+                        } else if (data.face_emotion === 'neutral' && data.face_confidence === 0) {
+                            faceAnalysisText = '<p><strong>Facial emotion:</strong> No face detected or analysis failed</p>';
+                        } else {
+                            faceAnalysisText = `<p><strong>Facial emotion:</strong> ${data.face_emotion} (confidence: ${(data.face_confidence * 100).toFixed(1)}%)</p>`;
+                        }
+                    } else {
+                        faceAnalysisText = '<p><strong>Facial emotion:</strong> Not used in this analysis</p>';
+                    }
+                    
+                    breakdownContent.innerHTML = `
+                        <p><strong>Text emotion:</strong> ${data.text_emotion} (confidence: ${(data.text_confidence * 100).toFixed(1)}%)</p>
+                        ${faceAnalysisText}
+                    `;
+
+                    // Tasks
+                    const taskList = document.getElementById('taskList');
+                    taskList.innerHTML = '';
+                    if (data.tasks && data.tasks.length > 0) {
+                        data.tasks.forEach(task => {
+                            const li = document.createElement('li');
+                            li.textContent = task;
+                            taskList.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'No specific recommendations available';
+                        taskList.appendChild(li);
+                    }
+
+                    // Confidence message
+                    const confidenceMessage = document.getElementById('confidenceMessage');
+                    if (data.final_confidence < 0.4) {
+                        confidenceMessage.classList.remove('hidden');
+                    } else {
+                        confidenceMessage.classList.add('hidden');
+                    }
+
+                    results.classList.remove('hidden');
+                } else {
+                    // Show error
+                    document.getElementById('errorMessage').textContent = data.error;
+                    error.classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('errorMessage').textContent = 'Network error: ' + err.message;
+                error.classList.remove('hidden');
+            } finally {
+                // CRITICAL: Stop camera and cleanup after analysis
+                if (tempWebcamPreview) {
+                    console.log('🛑 Stopping camera after analysis');
+                    tempWebcamPreview.destroy();
+                    tempWebcamPreview = null;
+                }
+                
+                loading.classList.add('hidden');
+                analyzeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
