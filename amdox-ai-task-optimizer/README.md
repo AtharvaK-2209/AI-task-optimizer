@@ -5,7 +5,6 @@
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 🎯 Overview
 
@@ -263,31 +262,6 @@ python3 -c "from src.facial_emotion.face_detect import capture_face_frame; print
 - **Memory Profiling**: No memory leaks detected
 - **Accuracy Testing**: Cross-validated on held-out datasets
 
-## 🚀 Deployment
-
-### Development Server
-```bash
-python3 dashboard/app.py
-# Access: http://localhost:8080
-```
-
-### Production Deployment
-```bash
-# Using Gunicorn (recommended)
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:8080 dashboard.app:app
-
-# Using Docker
-docker build -t ai-task-optimizer .
-docker run -p 8080:8080 ai-task-optimizer
-```
-
-### Environment Variables
-```bash
-export FLASK_ENV=production
-export FLASK_DEBUG=False
-export PORT=8080
-```
 
 ## 🔧 Configuration
 
@@ -347,9 +321,6 @@ python3 -m pytest tests/
 - **Docstrings**: Comprehensive function documentation
 - **Testing**: Unit tests for all new features
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👥 Team
 
@@ -362,12 +333,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Issues & Bug Reports
 - **GitHub Issues**: [Create an issue](https://github.com/AtharvaK-22/ai-task-optimizer/issues)
-- **Email**: [your-email@domain.com]
+- **Email**: atharvakalam2209@gmail.com
 
-### Documentation
-- **API Documentation**: `/docs` endpoint (when running)
-- **Technical Specs**: See `docs/` directory
-- **Video Demo**: [Link to demo video]
 
 ## 🙏 Acknowledgments
 
