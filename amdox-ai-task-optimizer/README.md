@@ -335,15 +335,6 @@ python3 -m pytest tests/
 - **GitHub Issues**: [Create an issue](https://github.com/AtharvaK-22/ai-task-optimizer/issues)
 - **Email**: atharvakalam2209@gmail.com
 
-
-## 🙏 Acknowledgments
-
-- **OpenCV Community**: Computer vision algorithms
-- **Scikit-learn**: Machine learning framework
-- **Flask Team**: Web framework
-- **Emotion Dataset**: Text emotion classification data
-- **Open Source Community**: Tools and guidance
-
 ---
 
 **⚡ Ready to optimize your workflow? Start the application and let AI guide your productivity!**
